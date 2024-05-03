@@ -133,8 +133,11 @@ class ChromeDriverCommand extends Command
 
         $milestones = $this->resolveChromeVersionsPerMilestone();
 
-        return $milestones['milestones'][$version]['version']
-            ?? throw new Exception('Could not get the ChromeDriver version.');
+        if (!isset($milestones['milestones'][$version]['version'])) {
+            throw new Exception('Could not get the ChromeDriver version.');
+        }
+
+        return $milestones['milestones'][$version]['version'];
     }
 
     /**
@@ -146,8 +149,11 @@ class ChromeDriverCommand extends Command
     {
         $versions = json_decode($this->getUrl('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json'), true);
 
-        return $versions['channels']['Stable']['version']
-            ?? throw new Exception('Could not get the latest ChromeDriver version.');
+        if (!isset($versions['channels']['Stable']['version'])) {
+            throw new Exception('Could not get the latest ChromeDriver version.');
+        }
+
+        return $versions['channels']['Stable']['version'];
     }
 
     /**
@@ -303,11 +309,23 @@ class ChromeDriverCommand extends Command
 
         $versions = $this->resolveChromeVersionsPerMilestone();
 
-        /** @var array<string, mixed> $chromedrivers */
-        $chromedrivers = $versions['milestones'][$milestone]['downloads']['chromedriver']
-            ?? throw new Exception('Could not get the ChromeDriver version.');
 
-        return collect($chromedrivers)->firstWhere('platform', $slug)['url']
-            ?? throw new Exception('Could not get the ChromeDriver version.');
+        if (!isset($versions['milestones'][$milestone]['downloads']['chromedriver'])) {
+            throw new Exception('Could not get the ChromeDriver version.');
+        }
+
+        /** @var array<string, mixed> $chromedrivers */
+        $chromedrivers = $versions['milestones'][$milestone]['downloads']['chromedriver'];
+
+        if (!is_array($chromedrivers)) {
+            throw new Exception('Could not get the ChromeDriver version.');
+        }
+
+        $drives = collect($chromedrivers)->firstWhere('platform', $slug);
+        if (!$drives || !isset($drives['url'])) {
+            throw new Exception('Could not get the ChromeDriver version.');
+        }
+
+        return $drives['url'];
     }
 }
