@@ -48,12 +48,12 @@ class ChromeProcess
             'linux' => 'chromedriver-linux',
             'mac' => 'chromedriver-mac',
             'mac-intel' => 'chromedriver-mac-intel',
-            'mac-arm' => 'chromedriver-mac-arm',
+            'mac-arm' => 'chromedriver-mac-arm64/chromedriver',
             'win' => 'chromedriver-win.exe',
         ];
 
         $this->driver = realpath(__DIR__.'/../../bin').DIRECTORY_SEPARATOR.$filenames[$this->operatingSystemId()];
-
+        chmod($this->driver, 0755);
         return $this->process($arguments);
     }
 
